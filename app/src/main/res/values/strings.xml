@@ -2,4 +2,5 @@
     <string name="app_name">知乎日报</string>
     <string name="clear_cache">清除缓存</string>
     <string name="refresh">刷新</string>
+    <string name="fail_to_refresh">更新失败</string>
 </resources>

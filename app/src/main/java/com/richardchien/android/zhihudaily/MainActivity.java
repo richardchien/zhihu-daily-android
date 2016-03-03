@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -28,10 +30,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
 
-
-public class MainActivity extends MyActivity implements AdapterView.OnItemClickListener {
+public class MainActivity extends MyActivity implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
     @Bind(R.id.list_view)
     ListView mListView;
+
+    @Bind(R.id.swipe_refresh_layout)
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
     private String mStoriesJsonString;
     private List<Story> mStories = new ArrayList<>();
@@ -42,6 +46,8 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
+
+        mSwipeRefreshLayout.setOnRefreshListener(this);
 
         mListView.setAdapter(new CommonAdapter<Story>(this, mStories, R.layout.list_item) {
             @Override
@@ -78,10 +84,14 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
     }
 
     private void refreshNews() {
+        mSwipeRefreshLayout.setRefreshing(true);
+
         mHttpClient.cancelAllRequests(true);
         mHttpClient.get(this, Api.LATEST_NEWS, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                mSwipeRefreshLayout.setRefreshing(false);
+
                 String jsonString = Helper.stringFromBytes(responseBody);
                 if (jsonString != null) {
                     mStoriesJsonString = jsonString;
@@ -93,6 +103,8 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 Log.i("Info", "Fail to fetch latest news");
+                mSwipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(MainActivity.this, R.string.fail_to_refresh, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -151,9 +163,9 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
 
     private int clearCacheFolder(File dir, long curTime) {
         int deletedFiles = 0;
-        if (dir!= null && dir.isDirectory()) {
+        if (dir != null && dir.isDirectory()) {
             try {
-                for (File child:dir.listFiles()) {
+                for (File child : dir.listFiles()) {
                     if (child.isDirectory()) {
                         deletedFiles += clearCacheFolder(child, curTime);
                     }
@@ -163,10 +175,15 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
                         }
                     }
                 }
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return deletedFiles;
+    }
+
+    @Override
+    public void onRefresh() {
+        refreshNews();
     }
 }
