@@ -127,7 +127,7 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent = new Intent(getApplicationContext(), StoryActivity.class);
         Bundle bundle = new Bundle();
         bundle.putInt(C.KEY_ID, mStories.get(position).getId());
@@ -140,25 +140,29 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(R.string.clear_cache);
-        menu.add(R.string.refresh);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getTitle().equals(getString(R.string.clear_cache))) {
-            mCache.clear();
-            clearCacheFolder(getFilesDir(), System.currentTimeMillis());
-            clearCacheFolder(getCacheDir(), System.currentTimeMillis());
-            clearCacheFolder(getExternalCacheDir(), System.currentTimeMillis());
-            mCache.put(C.CACHE_LATEST_NEWS, mStoriesJsonString);
-            notifyListViewAdapter();
-        }
-        if (item.getTitle().equals(getString(R.string.refresh))) {
-            refreshNews();
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                refreshNews();
+                break;
+            case R.id.action_clear_cache:
+                clearAllCache();
+                notifyListViewAdapter();
         }
         return true;
+    }
+
+    private void clearAllCache() {
+        mCache.clear();
+        clearCacheFolder(getFilesDir(), System.currentTimeMillis());
+        clearCacheFolder(getCacheDir(), System.currentTimeMillis());
+        clearCacheFolder(getExternalCacheDir(), System.currentTimeMillis());
+        mCache.put(C.CACHE_LATEST_NEWS, mStoriesJsonString);
     }
 
     private int clearCacheFolder(File dir, long curTime) {
