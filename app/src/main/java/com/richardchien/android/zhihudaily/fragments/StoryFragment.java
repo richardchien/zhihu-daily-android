@@ -1,5 +1,6 @@
 package com.richardchien.android.zhihudaily.fragments;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -121,5 +122,12 @@ public class StoryFragment extends BaseFragment {
                         body + "\n" +
                         "</html>";
         return html;
+    }
+
+    public void openInBrowser() {
+        Intent view = new Intent();
+        view.setAction(Intent.ACTION_VIEW);
+        view.setData(Uri.parse(String.format(Api.SHARE_URL, mId)));
+        startActivity(view);
     }
 }

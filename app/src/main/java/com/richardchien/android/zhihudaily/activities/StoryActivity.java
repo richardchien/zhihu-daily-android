@@ -2,14 +2,12 @@ package com.richardchien.android.zhihudaily.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.richardchien.android.zhihudaily.R;
 import com.richardchien.android.zhihudaily.fragments.StoryFragment;
-import com.richardchien.android.zhihudaily.others.Api;
 import com.richardchien.android.zhihudaily.others.C;
 
 public class StoryActivity extends BaseActivity {
@@ -22,20 +20,17 @@ public class StoryActivity extends BaseActivity {
         context.startActivity(starter);
     }
 
-    private int mId;
-    private String mTitle;
+    StoryFragment mStoryFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_story);
 
-        mId = getIntent().getIntExtra(C.KEY_ID, 0);
-        mTitle = getIntent().getStringExtra(C.KEY_TITLE);
-
+        mStoryFragment = StoryFragment.newInstance(getIntent().getIntExtra(C.KEY_ID, 0), getIntent().getStringExtra(C.KEY_TITLE));
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fl_story_container, StoryFragment.newInstance(mId, mTitle))
+                .replace(R.id.fl_story_container, mStoryFragment)
                 .commit();
     }
 
@@ -49,15 +44,8 @@ public class StoryActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_open_in_browser:
-                openInBrowser();
+                mStoryFragment.openInBrowser();
         }
         return true;
-    }
-
-    private void openInBrowser() {
-        Intent view = new Intent();
-        view.setAction(Intent.ACTION_VIEW);
-        view.setData(Uri.parse(String.format(Api.SHARE_URL, mId)));
-        startActivity(view);
     }
 }
