@@ -59,13 +59,15 @@ public class StoryFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_story, container, false);
         ButterKnife.bind(this, view);
-        load(getArguments().getInt(C.KEY_ID), getArguments().getString(C.KEY_TITLE));
+        mId = getArguments().getInt(C.KEY_ID);
+        mTitle = getArguments().getString(C.KEY_TITLE);
+        load();
         return view;
     }
 
-    public void load(int id, String title) {
-        mTextTitle.setText(title);
-        loadContent(id);
+    public void load() {
+        mTextTitle.setText(mTitle);
+        loadContent(mId);
     }
 
     private void loadContent(int id) {
