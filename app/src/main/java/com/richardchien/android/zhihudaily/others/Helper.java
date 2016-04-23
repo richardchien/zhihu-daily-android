@@ -1,4 +1,4 @@
-package com.richardchien.android.zhihudaily;
+package com.richardchien.android.zhihudaily.others;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

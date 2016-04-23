@@ -1,14 +1,14 @@
-package com.richardchien.android.zhihudaily;
+package com.richardchien.android.zhihudaily.fragments;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
@@ -19,8 +19,13 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.richardchien.android.commonadapter.CommonAdapter;
 import com.richardchien.android.commonadapter.ViewHolder;
+import com.richardchien.android.zhihudaily.R;
+import com.richardchien.android.zhihudaily.activities.StoryActivity;
 import com.richardchien.android.zhihudaily.entities.LatestNews;
 import com.richardchien.android.zhihudaily.entities.Story;
+import com.richardchien.android.zhihudaily.others.Api;
+import com.richardchien.android.zhihudaily.others.C;
+import com.richardchien.android.zhihudaily.others.Helper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,7 +35,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
 
-public class MainActivity extends MyActivity implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
+/**
+ * ZhihuDaily
+ * Created by richard on 16/4/23.
+ */
+public class ListFragment extends BaseFragment implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
     @Bind(R.id.list_view)
     ListView mListView;
 
@@ -40,16 +49,15 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
     private String mStoriesJsonString;
     private List<Story> mStories = new ArrayList<>();
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        ButterKnife.bind(this);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_list, container, false);
+        ButterKnife.bind(this, view);
 
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
-        mListView.setAdapter(new CommonAdapter<Story>(this, mStories, R.layout.list_item) {
+        mListView.setAdapter(new CommonAdapter<Story>(getContext(), mStories, R.layout.list_item) {
             @Override
             public void onPostCreateView(ViewHolder holder, Story story) {
                 SimpleDraweeView draweeView = holder.getView(R.id.image_story_small);
@@ -75,19 +83,21 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
         }
 
         refreshNews();
+
+        return view;
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         notifyListViewAdapter();
     }
 
-    private void refreshNews() {
+    public void refreshNews() {
         mSwipeRefreshLayout.setRefreshing(true);
 
         mHttpClient.cancelAllRequests(true);
-        mHttpClient.get(this, Api.LATEST_NEWS, new AsyncHttpResponseHandler() {
+        mHttpClient.get(getContext(), Api.LATEST_NEWS, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 mSwipeRefreshLayout.setRefreshing(false);
@@ -104,7 +114,7 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 Log.i("Info", "Fail to fetch latest news");
                 mSwipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(MainActivity.this, R.string.fail_to_refresh, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ListFragment.this.getContext(), R.string.fail_to_refresh, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -120,48 +130,34 @@ public class MainActivity extends MyActivity implements AdapterView.OnItemClickL
         notifyListViewAdapter();
     }
 
-    private void notifyListViewAdapter() {
+    public void notifyListViewAdapter() {
         // Notify the adapter of mListView
         BaseAdapter adapter = (BaseAdapter) mListView.getAdapter();
         adapter.notifyDataSetChanged();
     }
 
     @Override
-     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(getApplicationContext(), StoryActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putInt(C.KEY_ID, mStories.get(position).getId());
-        bundle.putString(C.KEY_TITLE, mStories.get(position).getTitle());
-        intent.putExtras(bundle);
-        startActivity(intent);
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (getActivity().findViewById(R.id.fl_story_container) == null) {
+            // Phone
+            StoryActivity.start(getContext(), mStories.get(position).getId(), mStories.get(position).getTitle());
+        } else {
+            // Tablet
+            getFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fl_story_container, StoryFragment.newInstance(mStories.get(position).getId(), mStories.get(position).getTitle()))
+                    .addToBackStack(null)
+                    .commit();
+        }
 
         mCache.put(C.CACHE_STORY_READ + mStories.get(position).getId(), C.CACHE_STORY_READ);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_refresh:
-                refreshNews();
-                break;
-            case R.id.action_clear_cache:
-                clearAllCache();
-                notifyListViewAdapter();
-        }
-        return true;
-    }
-
-    private void clearAllCache() {
+    public void clearAllCache() {
         mCache.clear();
-        clearCacheFolder(getFilesDir(), System.currentTimeMillis());
-        clearCacheFolder(getCacheDir(), System.currentTimeMillis());
-        clearCacheFolder(getExternalCacheDir(), System.currentTimeMillis());
+        clearCacheFolder(getContext().getFilesDir(), System.currentTimeMillis());
+        clearCacheFolder(getContext().getCacheDir(), System.currentTimeMillis());
+        clearCacheFolder(getContext().getExternalCacheDir(), System.currentTimeMillis());
         mCache.put(C.CACHE_LATEST_NEWS, mStoriesJsonString);
     }
 

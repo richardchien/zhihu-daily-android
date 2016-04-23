@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:fresco="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="#ffffff"
-    app:cardCornerRadius="4dp">
+                                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                                    xmlns:fresco="http://schemas.android.com/tools"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:foreground="?attr/selectableItemBackground"
+                                    app:cardBackgroundColor="#ffffff"
+                                    app:cardCornerRadius="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
                 android:id="@+id/image_story_small"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                fresco:placeholderImage="@mipmap/ic_launcher" />
+                fresco:placeholderImage="@mipmap/ic_launcher"/>
 
             <TextView
                 android:id="@+id/text_many_pics"
@@ -35,7 +35,7 @@
                 android:paddingRight="3dp"
                 android:text="多图"
                 android:textColor="#DDDDDD"
-                android:textSize="11sp" />
+                android:textSize="11sp"/>
         </FrameLayout>
 
         <LinearLayout
@@ -48,10 +48,11 @@
                 android:id="@+id/text_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxHeight="80dp"
+                android:ellipsize="end"
+                android:maxLines="3"
                 android:text="TitleTitleTitleTitleTitleTitleTitleTitle"
                 android:textColor="#222222"
-                android:textSize="18sp" />
+                android:textSize="18sp"/>
         </LinearLayout>
     </LinearLayout>
 </android.support.v7.widget.CardView>

@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".activities.MainActivity">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal">
 
     <fragment
         android:id="@+id/fg_list"
         android:name="com.richardchien.android.zhihudaily.fragments.ListFragment"
-        android:layout_width="match_parent"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
         tools:layout="@layout/fragment_list"/>
+
+    <include layout="@layout/story_container"/>
 </LinearLayout>

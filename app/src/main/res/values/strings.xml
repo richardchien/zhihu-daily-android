@@ -3,4 +3,5 @@
     <string name="clear_cache">清除缓存</string>
     <string name="refresh">刷新</string>
     <string name="fail_to_refresh">更新失败</string>
+    <string name="open_in_browser">用浏览器打开</string>
 </resources>

@@ -1,17 +1,23 @@
-package com.richardchien.android.zhihudaily;
+package com.richardchien.android.zhihudaily.fragments;
 
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.WindowManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.richardchien.android.zhihudaily.R;
 import com.richardchien.android.zhihudaily.entities.StoryDetails;
+import com.richardchien.android.zhihudaily.others.Api;
+import com.richardchien.android.zhihudaily.others.C;
+import com.richardchien.android.zhihudaily.others.Helper;
 
 import java.util.List;
 
@@ -19,7 +25,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
 
-public class StoryActivity extends MyActivity {
+/**
+ * ZhihuDaily
+ * Created by richard on 16/4/23.
+ */
+public class StoryFragment extends BaseFragment {
     @Bind(R.id.web_view)
     WebView mWebView;
 
@@ -32,22 +42,28 @@ public class StoryActivity extends MyActivity {
     @Bind(R.id.image_head)
     SimpleDraweeView mDraweeView;
 
+    private int mId;
+    private String mTitle;
+
+    public static StoryFragment newInstance(int id, String title) {
+        Bundle args = new Bundle();
+        args.putInt(C.KEY_ID, id);
+        args.putString(C.KEY_TITLE, title);
+        StoryFragment fragment = new StoryFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_story);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_story, container, false);
+        ButterKnife.bind(this, view);
+        load(getArguments().getInt(C.KEY_ID), getArguments().getString(C.KEY_TITLE));
+        return view;
+    }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-        }
-
-        ButterKnife.bind(this);
-
-        Bundle bundle = getIntent().getExtras();
-        int id = bundle.getInt(C.KEY_ID);
-        String title = bundle.getString(C.KEY_TITLE);
-
+    public void load(int id, String title) {
         mTextTitle.setText(title);
         loadContent(id);
     }
